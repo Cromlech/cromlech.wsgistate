@@ -9,11 +9,8 @@ The session is automatically saved at end of context manager if no exceptions
 occurs
 """
 
-import crom
 import UserDict
-from cromlech.session.interfaces import ISession, ISaveableSessionTransactor
-from transaction.interfaces import IDataManagerSavepoint
-from wsgistate.session import SessionManager
+from transaction.interfaces import IDataManagerSavepoint, IDataManager
 from zope.interface import implements
 
 
@@ -49,8 +46,8 @@ class Savepoint(UserDict.UserDict):
         self.transactor.update(self.data)
 
 
-class WsgistateSession(UserDict.UserDict):
-    implements(ISession, ISaveableSessionTransactor)
+class WsgistateDataManager(UserDict.UserDict):
+    implements(IDataManager)
 
     save = None
     state = CLEAN
@@ -59,10 +56,6 @@ class WsgistateSession(UserDict.UserDict):
         self.manager = manager
         self._last_commit = self.canonical = manager.session
         self.data = manager.session.copy()
-
-    @property
-    def session(self):
-        return self
 
     def savepoint(self):
         if self.state is UNSAVED:
@@ -76,7 +69,7 @@ class WsgistateSession(UserDict.UserDict):
     def __persist(self, data):
         self.manager.session = data
 
-    def commit(self):
+    def commit(self, transaction):
         self._last_commit = self.data.copy()
         self.__persist(self._last_commit)
 
@@ -89,28 +82,43 @@ class WsgistateSession(UserDict.UserDict):
             raise SessionStateException(
                 "Session's current state disallows writing")
 
-    def abort(self):
-         if self.state not in [ABORTED, CLOSED]:
-             self.clear()
-             self.data = self._last_commit
-             self.save = None
-             self.state = ABORTED
+    def abort(self, transaction):
+        if self.state not in [ABORTED, CLOSED]:
+            self.clear()
+            self.data = self._last_commit
+            self.save = None
+            self.state = ABORTED
 
-    def finish(self):
+    def tpc_begin(self, transaction):
         pass
 
+    def tpc_vote(self, transaction):
+        pass
 
-@crom.adapter
-@crom.sources(SessionManager)
-@crom.target(ISession)
-@crom.implements(ISession)
-def wsgistate_session(manager):
-    return manager.session
+    def tpc_finish(self, transaction):
+        pass
+
+    def tpc_abort(self, transaction):
+        pass
+
+    def sortKey(self):
+        return "~cromlech.wsgisession"
 
 
-@crom.adapter
-@crom.sources(SessionManager)
-@crom.target(ISaveableSessionTransactor)
-@crom.implements(ISession, ISaveableSessionTransactor)
-def wsgistate_transactor(manager):
-    return WsgistateSession(manager)
+class WsgistateSession(object):
+
+    def __init__(self, environ, key, transaction_manager=None):
+        self.key = key
+        self.environ = environ
+        self.transaction_manager = transaction_manager
+
+    def __enter__(self):
+        manager = self.environ[self.key]
+        if self.transaction_manager is not None:
+            dm = WsgistateDataManager(manager)
+            self.transaction_manager.join(dm)
+            return dm
+        return manager.session
+
+    def __exit__(self, type, value, traceback):
+        pass

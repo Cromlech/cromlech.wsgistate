@@ -9,8 +9,6 @@ install_requires = [
     'wsgistate',
     'setuptools',
     'transaction',
-    'crom',
-    'cromlech.session',
     ]
 
 tests_require = [
