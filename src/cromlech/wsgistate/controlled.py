@@ -10,7 +10,7 @@ occurs
 """
 
 import UserDict
-from cromlech.browser import ISession, setSession
+from cromlech.browser import ISession, setSession, getSession
 from transaction.interfaces import IDataManagerSavepoint, IDataManager
 from zope.interface import implements
 
@@ -79,7 +79,6 @@ class WsgistateDataManager(UserDict.UserDict):
             self.state = UNSAVED
             UserDict.UserDict.__setitem__(self, name, value)
         else:
-            raise KeyError(name, value)
             raise SessionStateException(
                 "Session's current state disallows writing")
 
@@ -97,7 +96,7 @@ class WsgistateDataManager(UserDict.UserDict):
         pass
 
     def tpc_finish(self, transaction):
-        pass
+        self.state = CLOSED
 
     def tpc_abort(self, transaction):
         pass
