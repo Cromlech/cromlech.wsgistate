@@ -9,6 +9,7 @@ install_requires = [
     'wsgistate',
     'setuptools',
     'transaction',
+    'cromlech.browser >= 0.5.2',
     ]
 
 tests_require = [
@@ -42,6 +43,7 @@ setup(name='cromlech.wsgistate',
       entry_points="""
       # -*- Entry points: -*-
       [paste.app_filter_factory]
-      session_wrapper = cromlech.wsgistate.middleware:session_wrapper
+      set_session = cromlech.wsgistate.middleware:session_wrapper
+      use_session = cromlech.wsgistate.middleware:session_application
       """,
       )

@@ -10,6 +10,7 @@ occurs
 """
 
 import UserDict
+from cromlech.browser import ISession, setSession
 from transaction.interfaces import IDataManagerSavepoint, IDataManager
 from zope.interface import implements
 
@@ -47,7 +48,7 @@ class Savepoint(UserDict.UserDict):
 
 
 class WsgistateDataManager(UserDict.UserDict):
-    implements(IDataManager)
+    implements(ISession, IDataManager)
 
     save = None
     state = CLEAN
@@ -108,17 +109,18 @@ class WsgistateDataManager(UserDict.UserDict):
 class WsgistateSession(object):
 
     def __init__(self, environ, key, transaction_manager=None):
-        self.key = key
-        self.environ = environ
+        self.manager = environ[key]
         self.transaction_manager = transaction_manager
 
     def __enter__(self):
-        manager = self.environ[self.key]
         if self.transaction_manager is not None:
-            dm = WsgistateDataManager(manager)
+            dm = WsgistateDataManager(self.manager)
             self.transaction_manager.join(dm)
+            setSession(dm)
             return dm
-        return manager.session
+        else:
+            setSession(self.manager.session)
+            return self.manager.session
 
     def __exit__(self, type, value, traceback):
-        pass
+        setSession()

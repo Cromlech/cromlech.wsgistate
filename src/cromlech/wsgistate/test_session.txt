@@ -8,26 +8,25 @@ Let's import some helpers::
 
 And our session controller::
 
-    >>> from cromlech.wsgistate import WsgistateSession
-    >>> from cromlech.wsgistate.controlled import WsgistateSession
+    >>> from cromlech.browser import getSession
 
     >>> def simple_app(environ, start_response):
     ...     """retained visited path, raise exception if path contain 'fail'
     ...     """
-    ...     with WsgistateSession(environ, SK) as session:
-    ...         path = environ['PATH_INFO']
-    ...         history = session.setdefault('path', [])
-    ...         history.append(path)
-    ...         if path == '/fail':
-    ...             raise ValueError
+    ...     session = getSession()
+    ...     path = environ['PATH_INFO']
+    ...     history = session.setdefault('path', [])
+    ...     history.append(path)
+    ...     if path == '/fail':
+    ...         raise ValueError
     ...     start_response('200 OK', [('Content-type', 'text/plain')])
     ...     return [', '.join(history)]
 
 
 Then run it with wsgistate middelware:
 
-    >>> from cromlech.wsgistate import session_wrapper
-    >>> wsgi_app = TestApp(session_wrapper(simple_app, session_key=SK))
+    >>> from cromlech.wsgistate import session_application
+    >>> wsgi_app = TestApp(session_application(simple_app, session_key=SK))
     >>> result = wsgi_app.get('/foo')
     >>> result.status
     '200 OK'
@@ -56,6 +55,7 @@ Testing the transaction awareness
 ---------------------------------
 
     >>> import transaction
+    >>> from cromlech.wsgistate import WsgistateSession
 
     >>> def transactional_app(environ, start_response):
     ...
@@ -94,6 +94,7 @@ Testing the transaction awareness
     ...     start_response('200 OK', [('Content-type', 'text/plain')])
     ...     return [session.get('crom', ''), session.get('lech', '')]
 
+    >>> from cromlech.wsgistate import session_wrapper
     >>> wsgi_app = TestApp(session_wrapper(transactional_app, session_key=SK))
     >>> result = wsgi_app.get('/bar')
     >>> result.body
