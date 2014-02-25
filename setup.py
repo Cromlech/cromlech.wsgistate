@@ -42,7 +42,7 @@ setup(name='cromlech.wsgistate',
       extras_require={'test': tests_require},
       entry_points="""
       # -*- Entry points: -*-
-      [paste.app_filter_factory]
+      [paste.filter_app_factory]
       set_session = cromlech.wsgistate.middleware:session_wrapper
       """,
       )
