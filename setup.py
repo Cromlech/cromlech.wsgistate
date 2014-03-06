@@ -43,6 +43,7 @@ setup(name='cromlech.wsgistate',
       entry_points="""
       # -*- Entry points: -*-
       [paste.filter_app_factory]
-      set_session = cromlech.wsgistate.middleware:session_wrapper
+      session = cromlech.wsgistate.middleware:session_wrapper
+      file_session = cromlech.wsgistate.middleware:file_session_wrapper
       """,
       )
