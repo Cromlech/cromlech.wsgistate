@@ -3,10 +3,10 @@
 import os
 from setuptools import setup, find_packages
 
-version = '0.1dev'
+version = '0.1'
 
 install_requires = [
-    'wsgistate',
+    'wsgistate >= 0.4.3',
     'setuptools',
     'transaction',
     'cromlech.browser >= 0.5.2',
