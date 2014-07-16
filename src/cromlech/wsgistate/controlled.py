@@ -10,7 +10,8 @@ occurs
 """
 
 import UserDict
-from cromlech.browser import ISession, setSession, getSession
+from cromlech.browser import setSession, getSession
+from cromlech.browser.interfaces import ISession
 from transaction.interfaces import IDataManagerSavepoint, IDataManager
 from zope.interface import implements
 
