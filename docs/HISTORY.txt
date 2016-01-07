@@ -1,6 +1,13 @@
 Changelog
 =========
 
+0.2 (2014-08-06)
+----------------
+
+- Forwarding the local_conf options to the decorator, for further
+  configuration
+
+
 0.1 (2013-03-13)
 ----------------
 
