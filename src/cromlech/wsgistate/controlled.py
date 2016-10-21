@@ -9,11 +9,11 @@ The session is automatically saved at end of context manager if no exceptions
 occurs
 """
 
-import UserDict
 from cromlech.browser import setSession, getSession
 from cromlech.browser.interfaces import ISession
 from transaction.interfaces import IDataManagerSavepoint, IDataManager
-from zope.interface import implements
+from zope.interface import implementer
+from collections import UserDict
 
 
 class SessionStateException(Exception):
@@ -35,8 +35,8 @@ ABORTED = State('aborted')
 CLOSED = State('closed')
 
 
-class Savepoint(UserDict.UserDict):
-    implements(IDataManagerSavepoint)
+@implementer(IDataManagerSavepoint)
+class Savepoint(UserDict):
 
     def __init__(self, transactor, data):
         UserDict.UserDict.__init__(self)
@@ -48,8 +48,8 @@ class Savepoint(UserDict.UserDict):
         self.transactor.update(self.data)
 
 
-class WsgistateDataManager(UserDict.UserDict):
-    implements(ISession, IDataManager)
+@implementer(ISession, IDataManager)
+class WsgistateDataManager(UserDict):
 
     save = None
     state = CLEAN
