@@ -13,7 +13,11 @@ from cromlech.browser import setSession, getSession
 from cromlech.browser.interfaces import ISession
 from transaction.interfaces import IDataManagerSavepoint, IDataManager
 from zope.interface import implementer
-from collections import UserDict
+
+try:
+    from collections import UserDict
+except ImportError:
+    from UserDict import UserDict
 
 
 class SessionStateException(Exception):
