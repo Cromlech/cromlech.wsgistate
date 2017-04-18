@@ -43,7 +43,7 @@ CLOSED = State('closed')
 class Savepoint(UserDict):
 
     def __init__(self, transactor, data):
-        UserDict.UserDict.__init__(self)
+        UserDict.__init__(self)
         self.transactor = transactor
         self.update(data)
 
@@ -82,7 +82,7 @@ class WsgistateDataManager(UserDict):
     def __setitem__(self, name, value):
         if self.state not in [CLOSED, ABORTED]:
             self.state = UNSAVED
-            UserDict.UserDict.__setitem__(self, name, value)
+            UserDict.__setitem__(self, name, value)
         else:
             raise SessionStateException(
                 "Session's current state disallows writing")
