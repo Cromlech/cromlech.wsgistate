@@ -3,7 +3,7 @@
 import os
 from setuptools import setup, find_packages
 
-version = '0.3b1'
+version = '0.3b2'
 
 install_requires = [
     'wsgistate >= 0.4.3',
